@@ -11,7 +11,7 @@ library(forcats)
 # IDEA primary colours -- two versions of the translation from CMYK to Hex
 # C:70 M:4 Y:2 K:0 -> #4DF5FA or #4ab1d8 teal
 # C:50 M:0 Y:80 K:0 -> #80FF33 or #81c063 green
-# C:1 M:92 Y:42 K:0 -> #FC1494 or #d9385f mauve
+# C:1 M:92 Y:42 K:0 -> #FC1494 or #d9385f magenta
 # C:0 M:10 Y:100 K:0 -> #FFE600 or #f7da1c yellow
 # C:90 M:90 Y:0 K:0 -> #1919FF or #383880 purple
 # C:0 M:72 Y:100 K:0 -> #FF4700 or #e26429 orange
