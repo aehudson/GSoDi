@@ -9,6 +9,8 @@ loadfonts(device="postscript")
 library(tidyverse)
 library(ggrepel)
 library(magick)
+library(maps)
+library(ggmap)
 
 
 # define a bunch of colors that follow IDEA's definitions ####
@@ -163,3 +165,62 @@ ggplot(donut_data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=perform_class_
   theme(legend.position = "none") + # remove legend
   labs(caption = "Source: International IDEA, The Global State of Democracy Indices, 1975-2020") # add caption
 ggsave("clean_elections_donut.png", width = 10, height = 6, units = "in") # save as a png
+
+# heatmaps for regime types by region ####
+
+gsodi %>%
+  filter(ID_region_name == "Latin America/Caribbean" & ID_year > 1999 &
+           !is.na(democratic_performance_name)) %>%
+  ggplot(aes(x=ID_year, y=forcats::fct_rev(ID_country_name), fill=democratic_performance_name)) + geom_tile() +
+  scale_x_continuous(breaks = scales::pretty_breaks(), expand = c(0, 0)) +
+  scale_fill_manual(values = demperf_colours) +
+  labs(title = "Democratic performance over time", subtitle = "Latin America/Caribbean", x = "", y = "",
+       caption = "Source: International IDEA, The Global State of Democracy Indices, 1975-2020") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), axis.ticks = element_line()) +
+  theme(legend.title = element_blank(), legend.position = "bottom")
+ggsave("heatmap_2000_Latin America_Caribbean.png", width = 10, height = 6, units = "in")
+
+
+#### Map of regime types ####
+
+# prepare regime data
+regime_map_data <- gsodi %>%
+  filter(ID_country_code < 961 & ID_year == 2020) %>%
+  # filter(!is.na(democratic_performance_name)) %>%
+  dplyr::select(ID_country_name, democratic_performance_name) %>%
+  mutate(ID_country_name = case_when(ID_country_name == "United States" ~ "USA", TRUE ~ ID_country_name)) %>%
+  mutate(ID_country_name = case_when(ID_country_name == "United Kingdom" ~ "UK", TRUE ~ ID_country_name)) %>%
+  mutate(ID_country_name = case_when(ID_country_name == "Cote d'Ivoire" ~ "Ivory Coast", TRUE ~ ID_country_name)) %>%
+  mutate(ID_country_name = case_when(ID_country_name == "Czechia" ~ "Czech Republic", TRUE ~ ID_country_name)) %>%
+  mutate(ID_country_name = case_when(ID_country_name == "Republic of Korea" ~ "South Korea", TRUE ~ ID_country_name)) %>%
+  mutate(ID_country_name = case_when(ID_country_name == "Democratic People's Republic of Korea" ~ "North Korea", TRUE ~ ID_country_name)) #%>%
+str(regime_map_data)
+# theme to ditch chart junk 
+ditch_the_axes <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+)
+
+earth <- map_data("world")
+
+regime_shapes <- left_join(earth, regime_map_data, by = c("region" = "ID_country_name"))
+head(regime_shapes)
+
+jpeg("Africa_regimes_map.jpg", width = 9, height = 9, units = 'in', res = 600)
+ggplot(data = regime_shapes, mapping = aes(x = long, y = lat, group = group)) + 
+  geom_polygon(data = regime_shapes, aes(fill = democratic_performance_name)) +
+  geom_polygon(color = "grey", fill = NA, size = 0.25) +
+  theme_bw() +
+  ditch_the_axes +
+  coord_fixed(xlim = c(-20, 52),  ylim = c(-32, 35), ratio = 1.3) + # set the limits of the plot area to center on Africa
+  scale_fill_manual(values = demperf_colours, na.value = "lightgrey") +
+  theme(legend.position = "bottom") +
+  labs(fill = "", caption = "Source: International IDEA, The Global State of Democracy Indices, 1975-2020") +
+  labs(title = "Regime Types in Africa", subtitle = "2020") 
+dev.off()
+
