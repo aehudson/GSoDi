@@ -20,7 +20,7 @@ idea_colours <- c("#20B6E8","#8CCAAE","#E62D5F","#FFDD00","#43358B","#EB6209")
 
 # democratic performance colors
 # green, green, green, blue, orange
-demperf_colours <- c("#8CCAAE","#a3d4be","#badfce","#336A97","#EB6209")
+demperf_colours <- c("#8CCAAE","#aed9c6","#d1e9de","#336A97","#EB6209")
 
 # regime classification colours
 # basic version of the demperf colours
